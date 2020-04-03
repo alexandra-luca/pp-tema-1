@@ -224,7 +224,7 @@
 ; Coliziunea ar presupune ca un colț inferior al păsării să aibă y-ul
 ; mai mare sau egal cu cel al pământului.
 (define (check-ground-collision bird)
- `codul-tau-aici)
+  (if (>= (+ (pasare-y bird) bird-height) ground-y) #t #f))
 
 ; invalid-state?
 ; invalid-state? îi va spune lui big-bang dacă starea curentă mai este valida,
@@ -236,27 +236,37 @@
 ; Vrem să integrăm verificarea coliziunii cu pământul în invalid-state?.
 
 ;TODO 22
-; Odată creată logică coliziunilor dintre pasăre și pipes, vrem să integrăm
+; Odată creată logica coliziunilor dintre pasăre și pipes, vrem să integrăm
 ; funcția nou implementată în invalid-state?.
 (define (invalid-state? state)
-  #f)
+  (or (check-ground-collision (stare-p state))
+      (check-pipe-collisions (stare-p state) (stare-lt state))))
 
 ;TODO 21
-; Odată ce am creat pasărea, pipe-urile, scor-ul și coliziunea cu pământul,
+; Odată ce am creat pasărea, pipe-urile, scorul și coliziunea cu pământul,
 ; următorul pas este verificarea coliziunii dintre pasăre și pipes.
 ; Implementati funcția check-pipe-collisions care va primi drept parametri
 ; o structură de tip pasăre, mulțimea de pipes din stare, și va returna
 ; true dacă există coliziuni, și false în caz contrar. Reiterând,
 ; fiecare pipe este format din 2 părți, cea superioară și cea inferioară,
-; acestea fiind despărțite de un gap de înălțime pipe-self-gap. Pot există
+; acestea fiind despărțite de un gap de înălțime pipe-self-gap. Pot exista
 ; coliziuni doar între pasăre și cele două părți. Dacă pasărea se află în
 ; chenarul lipsă, nu există coliziune.
 ;
 ; Hint: Vă puteți folosi de check-collision-rectangle, care va primi drept parametri
 ; colțul din stânga sus și cel din dreapta jos ale celor două dreptunghiuri
 ; pe care vrem să verificăm coliziunea.
+(define (check-pipe-collision bird pipe)
+  ; coliziunea dintre o pasare si un pipe
+  (if (and (< (pasare-x bird) (+ (teava-x pipe) pipe-width))
+           (> (pasare-x bird) (- (teava-x pipe) pipe-width))
+           (or (< (pasare-y bird) (teava-y pipe))
+               (> (pasare-y bird) (- (+ (teava-y pipe) pipe-self-gap) bird-height))))
+      #t
+      #f))
+
 (define (check-pipe-collisions bird pipes)
-  `codul-tau-aici)
+  (> (length (filter (λ (pipe) (check-pipe-collision bird pipe)) pipes)) 0))
 
 (define (check-collision-rectangles A1 A2 B1 B2)
   (match-let ([(posn AX1 AY1) A1]
