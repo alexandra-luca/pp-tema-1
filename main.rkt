@@ -5,7 +5,9 @@
 (require 2htdp/universe)
 (require lang/posn)
 
+(make-predictive '(42))
 (require "random.rkt")
+
 (require "abilities.rkt")
 (require "constants.rkt")
 ;---------------------------------------checker_exports------------------------------------------------
@@ -301,8 +303,8 @@ initial-gravity
 ; Fiecare cadru va fi desenat in urmatorul mod:
 ; bird peste ground, peste scor, peste pipes, peste empty-scene.
 ;
-; Hint: score-to-image primeste un numar real si intoarce scor-ul sub forma de imagine;
-; Scor-ul îl puteți plasa direct la coordonatele date, fără a mai face translatiile menționate mai jos.
+; Hint: score-to-image primeste un numar real si intoarce scorul sub forma de imagine;
+; Scorul îl puteți plasa direct la coordonatele date, fără a mai face translatiile menționate mai jos.
 ; Noi tinem minte coltul din stanga sus al imaginii, insa, la suprapunerea unei imagini A peste o alta imagine,
 ; coordonatele unde plasam imaginea A reprezinta centrul acesteia. Trebuie facute translatiile de la coltul din stanga
 ; sus la centrul imaginilor.
@@ -314,6 +316,8 @@ initial-gravity
 (define bird-image (rectangle bird-width bird-height  "solid" "yellow"))
 (define ground-image (rectangle scene-width ground-height "solid" "brown"))
 (define initial-scene (rectangle scene-width scene-height "solid" "white"))
+(define pipe-image (rectangle pipe-width pipe-height "solid" "green"))
+(define gap-image (rectangle pipe-width pipe-self-gap "solid" "white"))
 
 (define text-family (list "Gill Sans" 'swiss 'normal 'bold #f))
 (define (score-to-image x)
@@ -322,11 +326,39 @@ initial-gravity
 	empty-image))
 
 (define (draw-frame state)
-  initial-scene)
+  (place-images
+   (list bird-image
+         ground-image
+         (score-to-image (stare-s state)))
+   (list (make-posn (+ (pasare-x (stare-p state)) (quotient bird-width 2))
+                    (+ (pasare-y (stare-p state)) (quotient bird-height 2)))
+         (make-posn (quotient scene-width 2)
+                    (+ ground-y (quotient ground-height 2)))
+         (make-posn text-x
+                    text-y))
+   (place-pipes (stare-lt state) initial-scene)))
+
+;(define (draw-frame state)
+;        (place-image bird-image
+;                     (+ (pasare-x (stare-p state)) (quotient bird-width 2))
+;                     (+ (pasare-y (stare-p state)) (quotient bird-height 2))
+;                     (place-image ground-image
+;                                (quotient scene-width 2)
+;                                (+ ground-y (quotient ground-height 2))
+;                                (place-image (score-to-image (stare-s state))
+;                                             text-x
+;                                             text-y
+;                                             (place-pipes (stare-lt state) initial-scene)))))
+               
 
 ; Folosind `place-image/place-images` va poziționa pipe-urile pe scenă.
 (define (place-pipes pipes scene)
-	'your-code-here)
+  (foldl (λ (pipe scena-anterioara) (place-images (list gap-image pipe-image)
+                                                  (list (make-posn (+ (teava-x pipe) (quotient pipe-width 2))
+                                                             (+ (teava-y pipe) (quotient pipe-self-gap 2)))
+                                                        (make-posn (+ (teava-x pipe) (quotient pipe-width 2))
+                                                                   (quotient pipe-height 2)))
+                                                        scena-anterioara)) scene pipes))
 
 ; Bonus
 ; Completați abilities.rkt mai întâi, aceste funcții căt, apoi legați
