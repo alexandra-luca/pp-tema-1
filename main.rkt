@@ -285,7 +285,6 @@ initial-gravity
     (let ([state3 (struct-copy stare state2 [lt (next-state-pipes (stare-lt state2) initial-scroll-speed)])])
       (struct-copy stare state3 [s (+ 0.1 (stare-s state3))]))))
 
-
 ; draw-frame
 ; draw-frame va fi apelat de big-bang dupa fiecare apel la next-state, pentru a afisa cadrul curent.
 ;TODO 23
