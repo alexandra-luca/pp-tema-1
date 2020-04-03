@@ -82,7 +82,7 @@
 ; și x = bird-x.
 ; (get-initial-state) va fi o funcție care va returna starea inițială a jocului.
 (define-struct pasare (x y vy) #:transparent)
-(define-struct stare (p lt) #:transparent)
+(define-struct stare (p lt s) #:transparent)
 
 ;TODO 8
 ; În starea jocului, trebuie să păstrăm informații despre pipes. Pe parcursul jocului,
@@ -107,7 +107,8 @@
 ; și trebuie apelată în restul codului.
 (define (get-initial-state)
   (stare (pasare bird-x bird-initial-y 0)
-         (list (teava scene-width (+ added-number (random random-threshold))))))
+         (list (teava scene-width (+ added-number (random random-threshold))))
+         0))
 
 ;TODO 2
 ; După aceasta, implementați un getter care extrage din structura voastră
@@ -183,31 +184,35 @@
 ;
 ; Hint: cunoaștem lățimea unui pipe, pipe-width
 (define (clean-pipes pipes)
-  pipes)
-
+  (filter (λ (pipe) (> (teava-x pipe) (- 0 pipe-width))) pipes))
 
 ;TODO 13
-; Vrem să avem un sursa continuă de pipe-uri.
+; Vrem să avem o sursa continuă de pipe-uri.
 ; Implementati funcția add-more-pipes, care va primi drept parametru mulțimea pipe-urilor
 ; din stare și, dacă avem mai puțin de no-pipes pipe-uri, mai adăugăm una la mulțime,
 ; având x-ul egal cu pipe-width + pipe-gap + x-ul celui mai îndepărtat pipe, în raport
-; cu pasărea.
+; cu pasărea.                       
 (define (add-more-pipes pipes)
-  pipes)
+  (if (< (length pipes) no-pipes)
+      ; adaug un pipe nou la multimea pipes
+      (cons (teava (+ (+ pipe-width pipe-gap) (teava-x (car pipes))) 
+                   (+ added-number (random random-threshold)))
+            pipes)
+      pipes))
 
 ;TODO 14
 ; Vrem ca toate funcțiile implementate anterior legate de pipes să fie apelate
 ; de către next-state-pipes.
 ; Aceasta va primi drept parametri mulțimea pipe-urilor și scroll-speed-ul,
 ; și va apela cele trei funcții implementate anterior, în această ordine:
-; move-pipes, urmat de clean-pipes, urmat de add-more pipes.
+; move-pipes, urmat de clean-pipes, urmat de add-more-pipes.
 (define (next-state-pipes pipes scroll-speed)
-  pipes)
+  (add-more-pipes (clean-pipes (move-pipes pipes scroll-speed))))
 
 ;TODO 17
 ; Creați un getter ce va extrage scorul din starea jocului.
 (define (get-score state)
-  state)
+  (stare-s state))
 
 ;TODO 19
 ; Vrem să creăm logica coliziunii cu pământul.
@@ -270,15 +275,16 @@ initial-gravity
 ; în next-state.
 
 ;TODO 15
-; Vrem să implementăm logică legată de mișcarea, ștergerea și adăugarea pipe-urilor
+; Vrem să implementăm logica legată de mișcarea, ștergerea și adăugarea pipe-urilor
 ; în next-state. Acesta va apela next-state-pipes pe pipe-urile din starea curentă.
 
 ;TODO 18
 ; Vrem ca next-state să incrementeze scorul cu 0.1 la fiecare cadru.
 (define (next-state state)
-  (struct-copy stare state [p (next-state-bird (stare-p state) initial-gravity)]))
+  (let ([state2 (struct-copy stare state [p (next-state-bird (stare-p state) initial-gravity)])])
+    (let ([state3 (struct-copy stare state2 [lt (next-state-pipes (stare-lt state2) initial-scroll-speed)])])
+      (struct-copy stare state3 [s (+ 0.1 (stare-s state3))]))))
 
-; state.p = next-state-bird(state.p, initial-gravity) 
 
 ; draw-frame
 ; draw-frame va fi apelat de big-bang dupa fiecare apel la next-state, pentru a afisa cadrul curent.
