@@ -81,14 +81,12 @@
 ;    y = bird-inițial-y
 ; și x = bird-x.
 ; (get-initial-state) va fi o funcție care va returna starea inițială a jocului.
-(define-struct pasare (x y vy) #:transparent)
-(define-struct stare (p lt) #:transparent)
 
 ;TODO 8
 ; În starea jocului, trebuie să păstrăm informații despre pipes. Pe parcursul jocului,
 ; pipe-urile se vor schimba, unele vor fi șterse și vor fi adăugate altele.
 ; După ce definiți structura pentru pipe și pentru mulțimea de pipes din stare,
-; adăugați primul pipe în starea jocului. Acesta se va afla inițial în afara ecranului.
+; adăugați primul pipe în starea jocului. Acesta se va află inițial în afară ecranului.
 ; Celelalte pipe-uri vor fi adăugate ulterior, poziționându-le după acest prim pipe.
 ; Atenție! Fiecare pipe este format din 2 părți, cea superioară și cea inferioară,
 ; acestea fiind despărțite de un gap de înălțime pipe-self-gap.
@@ -98,7 +96,6 @@
 ; pentru a-l forța să nu fie inițial pe ecran.
 ; Atenție! Recomandăm să păstrați în stare colțul din stânga sus al chenarului lipsa
 ; dintre cele 2 pipe-uri!
-(define-struct teava (x y) #:transparent)
 
 ;TODO 16
 ; Vrem o modalitate de a păstra scorul jocului. După ce definiți structura
@@ -106,32 +103,30 @@
 ; Atenție get-initial-state trebuie sa fie o funcție
 ; și trebuie apelată în restul codului.
 (define (get-initial-state)
-  (stare (pasare bird-x bird-initial-y 0)
-         (list (teava scene-width (+ added-number (random random-threshold))))))
+  `codul-tau-aici)
 
 ;TODO 2
 ; După aceasta, implementați un getter care extrage din structura voastră
 ; pasărea, și un al doilea getter care extrage din structura pasăre
-; y-ul curent pe care se află aceasta.
+; y-ul curent pe care se află această.
 (define (get-bird state)
-  (stare-p state))
+  state)
 (define (get-bird-y bird)
-  (pasare-y bird))
+  bird)
 
 ;TODO 3
-; Trebuie să implementăm logica gravitației. next-state-bird va primi drept
-; parametri o structură de tip pasăre, și gravitația(un număr real). Aceasta va adauga
+; Trebuie să implementăm logică gravitației. next-state-bird va primi drept
+; parametri o structură de tip pasăre, și gravitația(un număr real). Aceasta va adaugă
 ; pozitiei pe y a păsării viteza acesteia pe y, si va adaugă vitezei pe y a păsării,
 ; gravitația.
 (define (next-state-bird bird gravity)
-  (match-let ([(pasare _ by bvy) bird])
-    (struct-copy pasare bird [y (+ by bvy)] [vy (+ bvy gravity)])))
+  `codul-tau-aici)
 
 ;TODO 4
 ; După aceasta, implementati un getter care extrage din structura voastră
 ; viteza pe y a păsării.
 (define (get-bird-v-y bird)
-  (pasare-vy bird))
+  bird)
 
 ;TODO 6
 ; Dorim să existe un mod prin care să imprimăm păsării un impuls.
@@ -139,7 +134,7 @@
 ; o structură de tip pasăre, momentum(un număr real), și va schimba viteza
 ; pe y a păsării cu -momentum.
 (define (next-state-bird-onspace bird momentum)
-  (struct-copy pasare bird [vy (- 0 momentum)]))
+  `codul-tau-aici)
 
 ; Change
 ; Change va fi responsabil de input-ul de la tastatură al jocului.
@@ -148,33 +143,28 @@
 ; care am apăsat-o. Aceasta va imprimă păsării momentum-ul, apelând
 ; funcția next-state-bird-onspace. Pentru orice altă tasta, starea rămâne aceeași.
 (define (change current-state pressed-key)
-  (if (key=? pressed-key " ")
-      (struct-copy stare current-state [p (next-state-bird-onspace (stare-p current-state) initial-momentum)])
-      (current-state)))
+  current-state)
 
 ;TODO 9
 ; După ce ați definit structurile pentru mulțimea de pipes și pentru un singur pipe,
 ; implementați getterul get-pipes, care va extrage din starea jocului mulțimea de pipes,
 ; sub formă de lista.
 (define (get-pipes state)
-  (stare-lt state))
+  `(gol))
 
 ;TODO 10
 ; Implementați get-pipe-x ce va extrage dintr-o singură structura de tip pipe, x-ul acesteia.
-(define (get-pipe-x pipe)
-  (teava-x pipe))
+(define(get-pipe-x pipe)
+  pipe)
 
 ;TODO 11
 ; Trebuie să implementăm logica prin care se mișcă pipes.
 ; Funcția move-pipes va primi drept parametri mulțimea pipe-urilor din stare
 ; și scroll-speed(un număr real). Aceasta va scădea din x-ul fiecărui pipe
 ; scroll-speed-ul dat.
-(define (move-one-pipe pipe scroll-speed)
-  (struct-copy teava pipe [x (- (teava-x pipe) scroll-speed)]))
-
 (define (move-pipes pipes scroll-speed)
-  (map (λ (t) (move-one-pipe t scroll-speed)) pipes))
-  
+  pipes)
+
 ;TODO 12
 ; Vom implementa logica prin care pipe-urile vor fi șterse din stare. În momentul
 ; în care colțul din DREAPTA sus al unui pipe nu se mai află pe ecran, acesta trebuie
@@ -259,7 +249,7 @@
               [(posn BX1 BY1) B1]
               [(posn BX2 BY2) B2])
     (and (< AX1 BX2) (> AX2 BX1) (< AY1 BY2) (> AY2 BY1))))
-initial-gravity
+
 ;Next-state
 ; Next-state va fi apelat de big-bang la fiecare cadru, pentru a crea efectul de
 ; animație. Acesta va primi ca parametru o structură de tip stare, și va întoarce
@@ -276,9 +266,7 @@ initial-gravity
 ;TODO 18
 ; Vrem ca next-state să incrementeze scorul cu 0.1 la fiecare cadru.
 (define (next-state state)
-  (struct-copy stare state [p (next-state-bird (stare-p state) initial-gravity)]))
-
-; state.p = next-state-bird(state.p, initial-gravity) 
+  state)
 
 ; draw-frame
 ; draw-frame va fi apelat de big-bang dupa fiecare apel la next-state, pentru a afisa cadrul curent.
